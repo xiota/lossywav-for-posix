@@ -50,35 +50,43 @@ const char lossyWAV_GPL [] =
     "This program is free software: you can redistribute it and/or modify it under\n"
     "the terms of the GNU General Public License as published by the Free Software\n"
     "Foundation, either version 3 of the License, or (at your option) any later\n"
-    "version.\n\n"
-    "This program is distributed in the hope that it will be useful,but WITHOUT ANY\n"
+    "version.\n"
+    "\n"
+    "This program is distributed in the hope that it will be useful, but WITHOUT ANY\n"
     "WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A\n"
-    "PARTICULAR PURPOSE.  See the GNU General Public License for more details.\n\n"
+    "PARTICULAR PURPOSE.  See the GNU General Public License for more details.\n"
+    "\n"
     "You should have received a copy of the GNU General Public License along with\n"
     "this program.  If not, see <http://www.gnu.org/licenses/>.\n";
 
 const char lossyWAV_process_description [] =
-    "Process Description:\n\n"
+    "Process Description:\n"
+    "\n"
     "lossyWAV is a near lossless audio processor which dynamically reduces the\n"
-    "bitdepth of the signal on a block-by-block basis. Bitdepth reduction adds noise\n"
-    "to the processed output. The amount of permissible added noise is based on\n"
-    "analysis of the signal levels in the default frequency range 20Hz to 16kHz.\n\n"
+    "bitdepth of the signal on a block-by-block basis by zeroing some least\n"
+    "significant bits.  Bitdepth reduction effectively adds noise to the processed\n"
+    "output below the noise floor.  The amount of permissible noise added is based\n"
+    "on analysis of the signal levels in the default frequency range 20Hz to 16kHz.\n"
+    "\n"
     "If signals above the upper limiting frequency are at an even lower level, they\n"
-    "can be swamped by the added noise. This is usually inaudible, but the behaviour\n"
-    "can be changed by specifying a different --limit (in the range 10kHz to 20kHz).\n\n"
+    "can be swamped by the added noise.  This is usually inaudible, but can be\n"
+    "changed by specifying a different limit between 10kHz and 20kHz.\n"
+    "\n"
     "For many audio signals there is little content at very high frequencies and\n"
     "forcing lossyWAV to keep the added noise level lower than the content at these\n"
-    "frequencies can increase the bitrate of the losslessly compressed output\n"
-    "dramatically for no perceptible benefit.\n\n"
+    "frequencies can dramatically increase the bitrate of the losslessly compressed\n"
+    "output for no perceptible benefit.\n"
+    "\n"
     "The noise added by the process is shaped using an adaptive method provided by\n"
     "Sebastian Gesemann. This method, as implemented in lossyWAV, aims to use the\n"
     "signal itself as the basis of the filter used for noise shaping. Adaptive noise\n"
     "shaping is enabled by default.\n";
 
 const char lossyWAV_standard_help [] =
-    "Usage   : lossyWAV <input wav file> <options>\n"
-    "\nExample : lossyWAV musicfile.wav\n"
-    "\nQuality Options:\n\n"
+    "Usage: lossyWAV <input wav file> <options>\n"
+    "\n"
+    "Quality Options:\n"
+    "\n"
     "-q, --quality <t>    where t is one of the following (default = standard):\n"
     "    I, insane        highest quality output, suitable for transcoding;\n"
     "    E, extreme       higher quality output, suitable for transcoding;\n"
@@ -87,7 +95,9 @@ const char lossyWAV_standard_help [] =
     "    C, economic      intermediate quality output, likely to be transparent;\n"
     "    P, portable      good quality output for DAP use, may not be transparent;\n"
     "    X, extraportable lowest quality output, probably not transparent.\n"
-    "\nStandard Options:\n\n"
+    "\n"
+    "Standard Options:\n"
+    "\n"
     "-C, --correction     write correction file for processed WAV file; default=off.\n"
     "-f, --force          forcibly over-write output file if it exists; default=off.\n"
     "-h, --help           display help.\n"
@@ -98,7 +108,6 @@ const char lossyWAV_standard_help [] =
     "-w, --writetolog     create (or add to) lossyWAV.log in the output directory.\n";
 
 const char lossyWAV_advanced_help [] =
-    "\n"
     "Advanced Options:\n"
     "\n"
     "-                    take WAV input from STDIN.\n"
@@ -206,18 +215,17 @@ const char lossyWAV_advanced_help [] =
     "-S, --silent         no screen output.\n";
 
 const char lossyWAV_special_thanks [] =
-    "\n"
     "Special thanks go to:\n"
     "\n"
-    "David Robinson       for the publication of his lossyFLAC method, guidance, and\n"
-    "                     the motivation to implement his method as lossyWAV.\n"
+    "David Robinson       for the publication of his lossyFLAC method, guidance,\n"
+    "                     and the motivation to implement his method as lossyWAV.\n"
     "\n"
     "Horst Albrecht       for ABX testing, valuable support in tuning the internal\n"
     "                     presets, constructive criticism and all the feedback.\n"
     "\n"
     "Sebastian Gesemann   for the adaptive noise shaping method and the amount of\n"
-    "                     help received in implementing it and also for the basis of\n"
-    "                     the fixed noise shaping method.\n"
+    "                     help received in implementing it and also for the basis\n"
+    "                     of the fixed noise shaping method.\n"
     "\n"
     "Tyge Lovset          for the C++ translation initiative.\n"
     "\n"
@@ -287,19 +295,25 @@ void parmsError()
     }
     else
     {
+        std::cerr << version_string << strings.version_short << std::endl;
+
         if (parameters.help > 1)
         {
-            std::cerr << lossyWAV_process_description << std::endl;
+            std::cerr << lossyWAVHead1 << std::endl;
+            std::cerr << lossyWAV_GPL << std::endl;
         }
 
         std::cerr << lossyWAV_standard_help;
+        std::cerr << std::endl;
+        std::cerr << lossyWAV_advanced_help;
 
         if (parameters.help > 1)
         {
-            std::cerr << lossyWAV_advanced_help;
+            std::cerr << std::endl;
+            std::cerr << lossyWAV_process_description;
+            std::cerr << std::endl;
+            std::cerr << lossyWAV_special_thanks;
         }
-
-        std::cerr << lossyWAV_special_thanks;
     }
 }
 
@@ -437,8 +451,6 @@ bool check_parameter()
 
     if ((parmchar() == 'h') || (current_parameter == "--help"))
     {
-        std::cerr << version_string << strings.version_short << lossyWAVHead1 << std::endl;
-        std::cerr << lossyWAV_GPL << std::endl;
         parameters.help = 1;
         parmsError();
         throw (0);
@@ -446,8 +458,6 @@ bool check_parameter()
 
     if ((parmchar() == 'L') || (current_parameter == "--longhelp"))
     {
-        std::cerr << version_string << strings.version_short << lossyWAVHead1 << std::endl;
-        std::cerr << lossyWAV_GPL << std::endl;
         parameters.help = 2;
         parmsError();
         throw (0);
@@ -1798,9 +1808,6 @@ bool getParms()
         }
         else
         {
-            std::cerr << version_string << strings.version_short << lossyWAVHead1 << std::endl;
-            std::cerr << lossyWAV_GPL << std::endl;
-
             if ((parmchar() == 'h') || (current_parameter == "--help") || (parmchar() == 'L') || (current_parameter == "--longhelp"))
             {
                 parameters.help = 1 + int32_t ((current_parameter == "--longhelp") || (parmchar() == 'L'));
@@ -1968,8 +1975,7 @@ void nParameter_Init(int32_t argc, char* argv[])
 
     if (!getParms())
     {
-        std::cerr << version_string << strings.version_short << lossyWAVHead1 << std::endl;
-        std::cerr << lossyWAV_GPL << std::endl;
+        std::cerr << version_string << strings.version_short << std::endl;
 
         if (parmError != "")
         {
@@ -1990,15 +1996,13 @@ void nParameter_Init(int32_t argc, char* argv[])
 
     if (parameters.help >= 1)
     {
-        std::cerr << version_string << strings.version_short << lossyWAVHead1 << std::endl;
-        std::cerr << lossyWAV_GPL << std::endl;
         parmsError();
         throw (0);
     }
 
     if ((parameters.output.verbosity) && (!parameters.output.silent))
     {
-        std::cerr << version_string << strings.version_short << lossyWAVHead1 << lossyWAVHead2;
+        std::cerr << version_string << strings.version_short << std::endl;
     }
 
     if ((!parameters.STDINPUT) && (parameters.wavName.length() == 0))

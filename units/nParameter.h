@@ -28,9 +28,11 @@
 #ifndef nParameter_h_
 #define nParameter_h_
 
-static const char lossyWAVHead1 [] = ", Copyright (C) 2007-2016 Nick Currie. Copyleft.\n";
-static const char lossyWAVHead2 [] = "This is free software under the GNU GPLv3+ license; There is NO WARRANTY, to\n"
-                                     "the extent permitted by law. <http://www.gnu.org/licenses/> for details.\n";
+static const char lossyWAVHead1 [] = "Copyright (C) 2007-2016 Nick Currie.\n";
+static const char lossyWAVHead2 [] =
+    "This is free software under the GNU GPLv3+ license;\n"
+    "There is NO WARRANTY, to the extent permitted by law.\n"
+    "<http://www.gnu.org/licenses/> for details.\n";
 extern std::ofstream LogOutput;
 
 void nParameter_Init(int32_t argc, char* argv[]);
