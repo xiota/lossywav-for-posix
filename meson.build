@@ -7,7 +7,16 @@ project(
 
 prefix = get_option('prefix')
 
-fftw = dependency('fftw3')
+fftw = dependency('fftw3', required: false)
+
+if fftw.found()
+  fftw_dep = declare_dependency(
+    compile_args: '-DHAVE_FFTW3',
+    dependencies: [fftw],
+  )
+else
+  fftw_dep = disabler()
+endif
 
 executable(
   meson.project_name(),
@@ -29,13 +38,12 @@ executable(
   ],
   cpp_args : [
     '-DHAVE_CHMOD',
-    '-DHAVE_FFTW3',
     '-DHAVE_NANOSLEEP',
     '-DHAVE_SETPRIORITY',
     '-DHAVE_STAT',
     '-DHAVE_STD_CHRONO_STEADY_CLOCK_NOW',
   ],
-  dependencies: [fftw],
+  dependencies: [fftw_dep],
   install: true,
   install_dir: get_option('bindir'),
 )
