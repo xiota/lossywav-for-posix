@@ -1,70 +1,63 @@
-HEADERS = \
-  version.h \
-  units/fftw_interface.h \
-  units/nComplex.h \
-  units/nCore.h \
-  units/nFFT.h \
-  units/nFillFFT.h \
-  units/nInitialise.h \
-  units/nMaths.h \
-  units/nOutput.h \
-  units/nParameter.h \
-  units/nProcess.h \
-  units/nRemoveBits.h \
-  units/nSGNS.h \
-  units/nShiftBlocks.h \
-  units/nSpreading.h \
-  units/nSupport.h \
-  units/nWav.h
 
-OBJS = \
-  units/fftw_interface.o \
-  units/nCore.o \
-  units/nFFT.o \
-  units/nFillFFT.o \
-  units/nInitialise.o \
-  units/nOutput.o \
-  units/nParameter.o \
-  units/nProcess.o \
-  units/nRemoveBits.o \
-  units/nSGNS.o \
-  units/nShiftBlocks.o \
-  units/nSpreading.o \
-  units/nWav.o \
-  lossyWAV.o
+pkgname := losswav
 
-COMMON_CXXFLAGS = -std=c++11 -O2 -pipe -Wall -Wextra
-DEFINES = -DHAVE_STD_CHRONO_STEADY_CLOCK_NOW -DHAVE_SETPRIORITY -DHAVE_STAT -DHAVE_CHMOD -DHAVE_NANOSLEEP
-COMMON_LDFLAGS = -Wl,-O1 -Wl,--sort-common -Wl,--as-needed
-LTO_FLAGS := -flto
+.SILENT:
+.PHONY: all dist dist-clean install clean help update-version clear-version configure build
 
-OPTIMIZED_CXXFLAGS := -march=native -Ofast
+all: configure build
 
-all: prep $(OBJS) link
-optimized: prep-optimized $(OBJS) link
-fftw: prep-fftw $(OBJS) link
-fftw-optimized: prep-fftw-optimized $(OBJS) link
-
-prep:
-	$(eval override CXXFLAGS = ${COMMON_CXXFLAGS} ${CXXFLAGS} ${DEFINES})
-	$(eval override LDFLAGS = ${COMMON_LDFLAGS} ${LDFLAGS})
-	$(eval override LIBS = ${COMMON_LIBS} ${LIBS})
-
-prep-optimized: prep
-	$(eval override CXXFLAGS += ${OPTIMIZED_CXXFLAGS} ${LTO_FLAGS})
-	$(eval override LDFLAGS += ${LTO_FLAGS})
-
-prep-fftw: prep
-	$(eval override CXXFLAGS += -DHAVE_FFTW3)
-	$(eval override LIBS += -lfftw3)
-
-prep-fftw-optimized: prep-optimized prep-fftw
-
-*.o: ${@:.o=.cpp} $(HEADERS)
-	${CXX:-g++} -c ${@:.o=.cpp} -o ${@} ${CXXFLAGS}
-
-link: $(OBJS)
-	${CXX} ${OBJS} -o lossywav ${LDFLAGS} ${LIBS}
+install:
+	cd build && \
+	meson install && \
+	:
 
 clean:
-	-rm -f $(OBJS) lossywav
+	rm -rf build && \
+	:
+
+help:
+	echo "Please provide a target:" ; \
+	echo "  [default]   - configure and build" ; \
+	echo "   install    - install to system" ; \
+	echo "   clean      - delete build dir" ; \
+	:
+
+update-version:
+	version=$(shell git describe --tags --abbrev=7 | sed -E 's/^[^0-9]*//;s/-([0-9]*-g.*)$$/.r\1/;s/-/./g') && \
+	meson rewrite kwargs set project / version $$version && \
+	echo "project version: $$version" && \
+	:
+
+clear-version:
+	meson rewrite kwargs delete project / version - && \
+	:
+
+configure:
+	meson setup build && \
+	:
+
+build:
+	export PKG_CONFIG_PATH="$(pkgconf_path)" && \
+	cd build && \
+	ninja && \
+	:
+
+dist:
+	export version=$(shell git describe --tags --abbrev=7 | sed -E 's/^[^0-9]*//;s/-([0-9]*-g.*)$$/.r\1/;s/-/./g') && \
+	echo "... $${version} ..." && \
+	export pkgdir="$(pkgname)_$$version" && \
+	echo "... $${pkgdir} ..." && \
+	mkdir -p "$${pkgdir}" && \
+	cp --reflink=auto -r -t "$${pkgdir}/" -- data source config* *.md Makefile meson* && \
+	pushd "$${pkgdir}" && \
+	echo "rewrite version..." && \
+	meson rewrite kwargs set project / version $$version && \
+	popd && \
+	echo "tar..." && \
+	tar -c -J --numeric-owner --owner=0 -f "$${pkgdir}.orig.tar.xz" "$${pkgdir}" && \
+	:
+
+dist-clean:
+	rm -rf $(pkgname)_*/ && \
+	rm -f $(pkgname)_*.orig.tar.xz && \
+	:
